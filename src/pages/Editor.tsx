@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Excalidraw } from '@excalidraw/excalidraw'
 import '@excalidraw/excalidraw/index.css'
-import { Pencil } from 'lucide-react'
+import { House } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 
 export default function Editor() {
@@ -58,10 +58,28 @@ export default function Editor() {
       {/* Home button */}
       <button
         onClick={() => navigate('/home')}
-        className="absolute top-2 left-14 z-[100] w-9 h-9 flex items-center justify-center rounded-lg shadow border bg-white border-gray-200 hover:bg-gray-50 transition-colors"
         title="Back to home"
+        style={{
+          position: 'absolute',
+          top: 15,
+          left: 60,
+          zIndex: 100,
+          width: 36,
+          height: 36,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: 8,
+          border: '1px solid #e5e5e5',
+          background: '#fff',
+          cursor: 'pointer',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+          transition: 'background 0.15s',
+        }}
+        onMouseEnter={e => (e.currentTarget.style.background = '#f5f3ff')}
+        onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
       >
-        <Pencil size={16} className="text-violet-600" />
+        <House size={15} color="#7c3aed" />
       </button>
     </div>
   )
