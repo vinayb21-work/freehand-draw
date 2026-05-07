@@ -43,7 +43,7 @@ export default function Editor() {
   )
 
   return (
-    <div className="w-full h-full relative">
+    <div className="editor-root relative">
       <div style={{ width: '100%', height: '100%' }}>
         <Excalidraw
           excalidrawAPI={(api: any) => setExcalidrawAPI(api)}
