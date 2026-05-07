@@ -1,9 +1,47 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Trash2, LogOut, Pencil, MoreHorizontal } from 'lucide-react'
+import { exportToSvg } from '@excalidraw/excalidraw'
 import { useAuth } from '../contexts/AuthContext'
 import { useAppStore } from '../store/appStore'
 import type { Workspace, DiagramFile } from '../types'
+
+function DiagramPreview({ elements, appState }: { elements: any[]; appState: Record<string, any> }) {
+  const [svgUrl, setSvgUrl] = useState<string | null>(null)
+  const isEmpty = !elements || elements.length === 0
+
+  useEffect(() => {
+    if (isEmpty) return
+    let cancelled = false
+    exportToSvg({ elements, appState, files: null } as any).then((svg: SVGSVGElement) => {
+      if (cancelled) return
+      svg.setAttribute('width', '100%')
+      svg.setAttribute('height', '100%')
+      const blob = new Blob([svg.outerHTML], { type: 'image/svg+xml' })
+      const url = URL.createObjectURL(blob)
+      setSvgUrl(prev => { if (prev) URL.revokeObjectURL(prev); return url })
+    }).catch(() => {})
+    return () => { cancelled = true }
+  }, [elements, isEmpty])
+
+  if (isEmpty || !svgUrl) {
+    return (
+      <div style={{ height: 112, background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+          <path d="M6 34 L16 10 L26 24 L32 16 L39 28" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/>
+          <rect x="8" y="26" width="13" height="9" rx="3" stroke="#a78bfa" strokeWidth="1.5" fill="none" opacity="0.5"/>
+          <rect x="26" y="18" width="11" height="11" rx="3" stroke="#c084fc" strokeWidth="1.5" fill="none" opacity="0.5"/>
+        </svg>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ height: 112, background: '#fafafa', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8 }}>
+      <img src={svgUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+    </div>
+  )
+}
 
 function timeAgo(ms: number): string {
   const diff = Date.now() - ms
@@ -63,13 +101,7 @@ function FileCard({ file, onNavigate, onRename, onDelete }: {
       }}
     >
       {/* Preview */}
-      <div style={{ height: 112, background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
-          <path d="M6 34 L16 10 L26 24 L32 16 L39 28" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/>
-          <rect x="8" y="26" width="13" height="9" rx="3" stroke="#a78bfa" strokeWidth="1.5" fill="none" opacity="0.5"/>
-          <rect x="26" y="18" width="11" height="11" rx="3" stroke="#c084fc" strokeWidth="1.5" fill="none" opacity="0.5"/>
-        </svg>
-      </div>
+      <DiagramPreview elements={file.elements} appState={file.appState} />
 
       {/* Info */}
       <div style={{ padding: '10px 14px 12px' }}>
