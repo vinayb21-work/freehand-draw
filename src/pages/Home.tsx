@@ -7,7 +7,7 @@ import { useAppStore } from '../store/appStore'
 import type { Workspace, DiagramFile } from '../types'
 
 function DiagramPreview({ elements, appState }: { elements: any[]; appState: Record<string, any> }) {
-  const [svgUrl, setSvgUrl] = useState<string | null>(null)
+  const [svgHtml, setSvgHtml] = useState<string | null>(null)
   const isEmpty = !elements || elements.length === 0
 
   useEffect(() => {
@@ -17,14 +17,13 @@ function DiagramPreview({ elements, appState }: { elements: any[]; appState: Rec
       if (cancelled) return
       svg.setAttribute('width', '100%')
       svg.setAttribute('height', '100%')
-      const blob = new Blob([svg.outerHTML], { type: 'image/svg+xml' })
-      const url = URL.createObjectURL(blob)
-      setSvgUrl(prev => { if (prev) URL.revokeObjectURL(prev); return url })
+      svg.style.display = 'block'
+      setSvgHtml(svg.outerHTML)
     }).catch(() => {})
     return () => { cancelled = true }
   }, [elements, isEmpty])
 
-  if (isEmpty || !svgUrl) {
+  if (isEmpty || !svgHtml) {
     return (
       <div style={{ height: 112, background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
@@ -37,9 +36,10 @@ function DiagramPreview({ elements, appState }: { elements: any[]; appState: Rec
   }
 
   return (
-    <div style={{ height: 112, background: '#fafafa', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8 }}>
-      <img src={svgUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-    </div>
+    <div
+      style={{ height: 112, background: '#fafafa', overflow: 'hidden', padding: 8, pointerEvents: 'none' }}
+      dangerouslySetInnerHTML={{ __html: svgHtml }}
+    />
   )
 }
 
